@@ -1,0 +1,6 @@
+__pycache__/
+.git
+.env
+*__pycache__/
+.ruff_cache/
+*.ruff_cache/
