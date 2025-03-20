@@ -11,6 +11,13 @@ class LogOpenedError(Exception):
             f"Log f'{lof_file}' currently active. Close it before creating a new one."
         )
 
+    
+class LogClosedError(Exception):
+    def __init__(self, method):
+        super().__init__(
+            f"Cannot call {method} on a closed log. Did you forget to call init?"
+        )
+
 
 class DualOutput:
     """
@@ -211,6 +218,8 @@ class BPLIMLogger:
         """
         Resumes redirection of output to the log file if it has been paused.
         """
+        if self._is_closed:
+            raise LogClosedError("on")
         if self._is_on:
             print("Log file already on")
             return
@@ -225,6 +234,8 @@ class BPLIMLogger:
         """
         Pauses redirection of output to the log file without closing the file.
         """
+        if self._is_closed:
+            raise LogClosedError("off")
         if not self._is_on:
             print("Log file already off")
             return
