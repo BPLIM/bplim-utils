@@ -123,6 +123,15 @@ class BPLIMLogger:
         BPLIMLogger._active_logger = self
         BPLIMLogger._active_logger_path = os.path.abspath(self._log_file)
 
+    def __repr__(self) -> str:
+        """Returns the object's representation"""
+        return f"BPLIMLogger(log_file={self._log_file}, append={self._append})"
+    
+    @property
+    def log_file(self) -> str:
+        """Returns the absolute path of the log file."""
+        return os.path.abspath(self._log_file)
+
     def _build_status_message(self, action: str) -> str:
         """
         Builds a standardized multi-line message for logging "opened", "resumed",
