@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 class LogOpenedError(Exception):
-    def __init__(self, lof_file):
+    def __init__(self, log_file):
         super().__init__(
-            f"Log f'{lof_file}' currently active. Close it before creating a new one."
+            f"Log f'{log_file}' currently active. Close it before creating a new one."
         )
 
     
