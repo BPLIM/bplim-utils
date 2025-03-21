@@ -270,6 +270,7 @@ class BPLIMLogger:
         self._write_status(message)
 
         self._current_log.close()
+        self._current_log = None
         self._restore_streams()
 
         self._is_closed = True
