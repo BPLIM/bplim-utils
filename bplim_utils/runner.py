@@ -7,12 +7,9 @@ def run_script(script_path: Union[Path, str]) -> None:
     """
     Compiles and executes a Python script from the given path.
     This sets the filename to `script_path` so that stack traces
-    show the correct file/line if an error occurs, and also
-    injects `__script__` into the script's globals so the file
-    path is accessible at runtime. That means, inside the script,
-    you can do:
-
-    `print("Running script:", __script__)`
+    show the correct file/line if an error occurs. While the 
+    script is running, it temporarily replaces the __file__ 
+    and __name__ globals.
 
     Parameters
     ----------
@@ -30,12 +27,25 @@ def run_script(script_path: Union[Path, str]) -> None:
     # reference that file name, not "<string>".
     code_obj = compile(script_content, script_path, "exec")
 
-    # Create a dictionary of globals for the script execution.
-    # We store `__script__` as an absolute path, so the script can
-    # reference its own filename if desired (like printing it).
-    script_globals = globals()
-    script_globals["__script__"] = os.path.abspath(script_path)
+    # Save previous globals
+    old_file = globals().get("__file__")
+    old_name = globals().get("__name__")
 
-    # Execute in these combined globals, allowing the script to
-    # access existing definitions (and the new `__script__`).
-    exec(code_obj, script_globals)
+    # Temporarily override
+    globals()["__file__"] = os.path.abspath(script_path)
+    globals()["__name__"] = "__main__"
+
+    # Execute code and restore original values 
+    try:
+        exec(code_obj, globals())
+    finally:
+        # Restore original values
+        if old_file is not None:
+            globals()["__file__"] = old_file
+        else:
+            globals().pop("__file__", None)
+
+        if old_name is not None:
+            globals()["__name__"] = old_name
+        else:
+            globals().pop("__name__", None)
