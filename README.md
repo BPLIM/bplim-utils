@@ -3,7 +3,7 @@
 **BPLIM Utils** is a small Python module that emulates some of Stata’s logging functionality and do-file execution flow for research contexts where reproducibility and ease of logging are important. The module provides:
 
 - **BPLIMLogger**: A single-active logger class that redirects `stdout` and `stderr` to a chosen file, supports pausing/resuming (“off/on”) without closing, and enforces that only one active log can exist at a time.  
-- **run_script**: A helper function to compile and run a Python script from a given path, ensuring correct tracebacks and exposing the file path as `__script__` to the executed code.
+- **run_script**: A helper function to compile and run a Python script from a given path, ensuring correct tracebacks and exposing the file path as `__file__` to the executed code.
 
 This repository is aimed at researchers using **BPLIM data** but can be adapted to other contexts.
 
@@ -19,7 +19,7 @@ This repository is aimed at researchers using **BPLIM data** but can be adapted 
 2. **Script Execution**  
    - `run_script(script_path)` reads, compiles, and executes a Python script.  
    - Tracebacks reflect the original filename, not `"<string>"`.  
-   - Allows the script to see `__script__` (the absolute path to the script), if needed.
+   - Allows the script to see `__file__` (the absolute path to the script), if needed.
 
 3. **Lightweight and Flexible**  
    - Minimal dependencies (just standard Python libraries).  
@@ -68,7 +68,7 @@ pip install .
 ### 2. run_script
 - `run_script(script_path)`
     - Reads the file at script_path, compiles it with the correct filename, and executes it.
-    - The script can reference **\_\_script\_\_** to get its own absolute path.
+    - The script can reference **\_\_file\_\_** to get its own absolute path.
     - Tracebacks show the original filename if errors occur.
 
 --- 
