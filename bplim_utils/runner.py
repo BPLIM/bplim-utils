@@ -1,51 +1,50 @@
 import os
-from typing import Union
+import inspect
 from pathlib import Path
+from typing import Union
 
 
 def run_script(script_path: Union[Path, str]) -> None:
     """
-    Compiles and executes a Python script from the given path.
-    This sets the filename to `script_path` so that stack traces
-    show the correct file/line if an error occurs. While the 
-    script is running, it temporarily replaces the __file__ 
-    and __name__ globals.
+    Compiles and executes a Python script from the given path 
+    using the caller's global namespace. This allows variables 
+    defined in one script (e.g., config.py) to persist across 
+    other executed scripts (step1.py, step2.py).
+    It also sets the filename to `script_path` so that stack traces
+    show the correct file/line if an error occurs. `__file__` and 
+    `__name__` are overridden temporarily to simulate direct script 
+    execution.
 
-    Parameters
-    ----------
-    script_path : Union[Path, str]
-        The path to the Python script to execute.
-
-    Raises
-    ------
-    Any exceptions raised by the executed script will propagate up.
+    Args:
+        script_path (Union[Path, str]): Path to the script to run.
     """
-    with open(script_path, "r") as f:
+    script_path = os.path.abspath(script_path)
+
+    with open(script_path, "r", encoding="utf-8") as f:
         script_content = f.read()
 
-    # Compile with the actual file path, so error tracebacks
-    # reference that file name, not "<string>".
     code_obj = compile(script_content, script_path, "exec")
 
-    # Save previous globals
-    old_file = globals().get("__file__")
-    old_name = globals().get("__name__")
+    # Get the caller's global scope
+    caller_globals = inspect.currentframe().f_back.f_globals
 
-    # Temporarily override
-    globals()["__file__"] = os.path.abspath(script_path)
-    globals()["__name__"] = "__main__"
+    # Save and temporarily override __file__ and __name__
+    old_file = caller_globals.get("__file__")
+    old_name = caller_globals.get("__name__")
 
-    # Execute code and restore original values 
+    caller_globals["__file__"] = script_path
+    caller_globals["__name__"] = "__main__"
+
     try:
-        exec(code_obj, globals())
+        exec(code_obj, caller_globals)
     finally:
         # Restore original values
         if old_file is not None:
-            globals()["__file__"] = old_file
+            caller_globals["__file__"] = old_file
         else:
-            globals().pop("__file__", None)
+            caller_globals.pop("__file__", None)
 
         if old_name is not None:
-            globals()["__name__"] = old_name
+            caller_globals["__name__"] = old_name
         else:
-            globals().pop("__name__", None)
+            caller_globals.pop("__name__", None)
